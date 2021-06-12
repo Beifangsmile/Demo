@@ -1,21 +1,199 @@
 plugins {
+    id 'org.springframework.boot' version '1.5.13.RELEASE'
     id 'java'
-    id 'war'
+    id 'com.palantir.docker' version "0.25.0"
 }
 
 group 'org.example'
 version '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
+ext{
+    tomcatVersion = "8.0.32"
+    springBootVersion = "1.5.13.RELEASE"
+    springSecurityOauth2 = "2.0.14.RELEASE"
+    springSecurityJwt = "1.0.7.RELEASE"
+
+    sitemeshVersion = "3.0.1"
+    guavaVersion = "19.0"
+    jodatimeVersion = "2.9.2"
+    ehcacheVersion = "2.10.1"
+    mysqlVersion = "5.1.38"
+    jedisVersion = "2.8.0"
+    shiroVersion = "1.2.4"
+    druidVersion = "1.0.16"
+    mybatisVersion = "3.4.0"
+    mybatisSpringVersion = "1.3.0"
+    mybatisSpringBootVersion = "1.1.1"
+    mybatisGeneratorMavenPlugin = "1.3.0"
+
+    webjarsJqueryVersion = "2.2.0"
+    webjarsJqueryValidationVersion = "1.4.0"
+    webjarsBootstrapVersion = "3.3.6"
+    webjarsFontAwesomeVersion = "4.5.0"
+
+    orgJsonVersion = "20160212"
+    jsoupVersion = "1.9.2"
+    poiVersion = "3.10-FINAL"
+
+    springfoxSwagger2Version = "2.2.2"
+    springfoxSwaggerUiVersion = "2.2.2"
+
+    javaxJstlApiVersion = "1.2"
+    javaxServletApiVersion = "3.1.0"
+    javaxJspApiVersion = "2.3.0"
+
+    jacksonVersion= "2.9.5"
+    netSfJsonVersion = "2.4"
+
+
+    commonsIoVersion = "2.5"
+    commonsLangVersion = "3.4"
+    commonsCollectionVersion = "3.2.2"
+    commonsCodecVersion = "1.9"
+    commonsFileuploadVersion = "1.3.1"
+    commonsBeanutilsVersion = "1.9.3"
+
+    aliyunOssVersion = "2.8.3"
+
+    //xml
+    xstreamVersion = "1.4.9"
+
+    poiVersion = "3.10-FINAL"
 }
+
+springBoot {
+    executable = true
+}
+
+configurations {
+    providedRuntime
+    compile.exclude module: 'spring-boot-starter-logging'
+    compile.exclude module: 'commons-logging'
+    compile.exclude module: 'h2'
+}
+
+
+repositories {
+    //使用淘宝的maven镜像
+    mavenLocal()
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
+    jcenter()
+}
+
+bootRun{
+    //开启页面热加载功能
+    addResources = true
+}
+
+docker {
+    dockerfile file('./Dockerfile')
+    name "docker.guangeryi.com:8443/library/dc_xhs_server:1.0"
+    files jar.archivePath
+    buildArgs(['JAR_FILE': "${jar.archiveName}"])
+}
+
+dockerPush.dependsOn(build)
 
 dependencies {
-    testImplementation 'junit:junit:4.11'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-}
+    compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-aop:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-amqp:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-data-redis:${springBootVersion}")
 
-test {
-    useJUnitPlatform()
+    //compile project(':server_common')
+
+    //compile("org.springframework.boot:spring-boot-starter-thymeleaf:${springBootVersion}")
+
+    compile group: 'net.sourceforge.nekohtml', name: 'nekohtml', version: '1.9.22'
+
+    // test
+    compile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    // mail
+    compile("org.springframework.boot:spring-boot-starter-mail:${springBootVersion}")
+
+    compile("org.springframework.security.oauth:spring-security-oauth2:${springSecurityOauth2}")
+    compile("org.springframework.security:spring-security-jwt:${springSecurityJwt}")
+
+    //log4j
+    compile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
+
+    //ehcache
+    compile("net.sf.ehcache:ehcache:${ehcacheVersion}")
+    //lombok
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
+    // https://mvnrepository.com/artifact/org.ocpsoft.prettytime/prettytime
+    compile group: 'org.ocpsoft.prettytime', name: 'prettytime', version: '4.0.5.Final'
+
+
+    //third
+    compile("com.aliyun.oss:aliyun-sdk-oss:2.2.1")
+    compile("Pingplusplus:pingpp-java:2.1.6")
+    compile("com.belerweb:pinyin4j:2.5.0")
+
+    //http
+
+    compile 'org.apache.httpcomponents:httpclient:4.5.2'
+
+    compile("org.jsoup:jsoup:${jsoupVersion}")
+
+    // commons
+    compile("org.apache.commons:commons-lang3:${commonsLangVersion}")
+    compile("commons-fileupload:commons-fileupload:${commonsFileuploadVersion}")
+    compile("commons-io:commons-io:${commonsIoVersion}")
+    compile("commons-beanutils:commons-beanutils:${commonsBeanutilsVersion}")
+    compile("commons-codec:commons-codec:${commonsCodecVersion}")
+    compile("commons-collections:commons-collections:${commonsCollectionVersion}")
+
+    // sdk
+    compile("com.aliyun.oss:aliyun-sdk-oss:${aliyunOssVersion}")
+
+    compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier:'jdk15'
+
+    compile("com.alibaba:druid:${druidVersion}")
+    compile("com.google.guava:guava:${guavaVersion}")
+    compile("mysql:mysql-connector-java:${mysqlVersion}")
+    // https://mvnrepository.com/artifact/org.apache.phoenix/phoenix-core
+    //compile group: 'org.apache.phoenix', name: 'phoenix-core', version: '5.0.0-HBase-2.0'
+
+    compile("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+    compile("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
+    compile("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    compile("com.fasterxml.jackson.module:jackson-module-parameter-names:${jacksonVersion}")
+    compile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}")
+    compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
+
+
+    compile("org.mybatis:mybatis:${mybatisVersion}")
+    compile("org.mybatis:mybatis-spring:${mybatisSpringVersion}")
+    compile("org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisSpringBootVersion}")
+    compile("org.mybatis.generator:mybatis-generator-maven-plugin:${mybatisGeneratorMavenPlugin}")
+    compile("org.mybatis:mybatis-typehandlers-jsr310:1.0.2")
+
+    compile group: 'com.baidu.aip', name: 'java-sdk', version: '4.1.0'
+
+    compile("dom4j:dom4j:1.6.1")
+    compile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
+
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.14.8'
+    compile group: 'dom4j', name: 'dom4j', version: '1.6.1'
+    compile group: 'javax.inject', name: 'javax.inject', version: '1'
+
+    //poi
+    compile("org.apache.poi:poi:${poiVersion}")
+    compile("org.apache.poi:poi-ooxml:${poiVersion}")
+    compile("org.apache.poi:poi-ooxml-schemas:${poiVersion}")
+
+    compile("cn.jpush.api:jiguang-common:1.1.1")
+    compile("cn.jpush.api:jpush-client:3.3.5")
+
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.62'
+
+    compile group: 'com.hankcs', name: 'hanlp', version: 'portable-1.7.1'
+    compile group: 'com.kennycason', name: 'kumo-core', version: '1.17'
+    compile group: 'com.kennycason', name: 'kumo-tokenizers', version: '1.17'
+    compile group: 'org.springframework.kafka',name: 'spring-kafka'
+
+    //annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.16'
 }
